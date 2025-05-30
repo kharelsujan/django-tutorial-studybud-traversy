@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from .models import Room, Topic, Message
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -127,14 +127,20 @@ def createRoom(request):
 
 @login_required(login_url='login')
 def updateRoom(request, pk):
+    #get specific room with following id
     room = Room.objects.get(id=pk)
+    #populate form with room instance value
     form = RoomForm(instance=room)
+    #grab all topic from Topic model
     topics = Topic.objects.all()
 
+    #only person hosted the room can delete/update the room
     if request.user != room.host:
         return HttpResponse('You are not allowed here!!')
     
+    #check method in order to create or update
     if request.method == "POST":
+        #don't accully know what does following do
         topic_name = request.POST.get('topic')
         topic, created = Topic.objects.get_or_create(name=topic_name)
         room.name = request.POST.get('name')
@@ -169,5 +175,24 @@ def deleteMessage(request, pk):
         message.delete()
         return redirect('home')
     return render(request, 'base/delete.html', {'obj': message})
+
+
+@login_required(login_url ='login')
+def updateUser(request):
+    #get information about the logged in user
+    user = request.user
+
+    #we can pass any model form in a context, render out in template and modify if required
+    #instance populate the form with the value we are instantiating with
+    form = UserForm(instance=user)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+    # validate form before saving
+        if form.is_valid():
+            form.save()
+            return redirect('profile', pk=user.id)
+
+    return render(request, 'base/update_user.html', {'form': form})
 
 
