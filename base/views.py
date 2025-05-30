@@ -66,7 +66,6 @@ def home(request):
     # this is a query set which is a list of objects of the model
     # ModelName.objects.all() will get all the objects of the model
     rooms = Room.objects.filter(Q(topic__name__icontains=q) |
-        Q(topic__name__icontains=q) |
         Q(host__username__icontains=q) |
         Q(name__icontains=q) |
         Q(description__icontains=q))
@@ -194,5 +193,11 @@ def updateUser(request):
             return redirect('profile', pk=user.id)
 
     return render(request, 'base/update_user.html', {'form': form})
+
+def topics(request):
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    topics = Topic.objects.filter(name__icontains = q)
+    context = {'topics' : topics}
+    return render(request,'base/topics.html', context)
 
 
