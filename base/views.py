@@ -57,7 +57,7 @@ def registerPage(request):
         else: 
             messages.error(request, 'An error occured during registrarion')
 
-    return render(request, 'base/login_register.html', {'form' : form})
+    return render(request, 'base/register.html', {'form' : form})
 
 # Create your views here.
 def home(request):
@@ -161,7 +161,7 @@ def deleteRoom(request, pk):
     if request.method == "POST":
         room.delete()
         return redirect('home')
-    context = {'room' : room}
+    context = {'obj' : room.name}
     return render(request, 'base/delete.html', context)
 
 @login_required(login_url='login')
@@ -173,7 +173,7 @@ def deleteMessage(request, pk):
 
     if request.method == "POST":
         message.delete()
-        return redirect('home')
+        return redirect('room', pk=message.room.id)
     return render(request, 'base/delete.html', {'obj': message})
 
 
